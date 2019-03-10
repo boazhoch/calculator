@@ -1,10 +1,12 @@
-import React, { Component } from "react";
+import React from "react";
 
 interface IProps {
   onClick(value: string): void;
+  value: string;
+  label: string;
  }
 
-const Btn = (props: IProps) => <button onClick={props.onClick}></button>
+const btn = (props: IProps) => <button onClick={() => props.onClick(props.value)}>{props.label}</button>
 
 
-export default Btn;
+export default btn;
