@@ -1,15 +1,11 @@
 import React, { Component } from "react";
+import "./Calculator.css";
 
-class Calculator extends Component {
+interface IProps {}
+
+class Calculator extends Component<IProps> {
   render() {
-    return (
-      <div className="row">
-        <div className="col">1</div>
-        <div className="col">1</div>
-        <div className="col">1</div>
-        <div className="col">1</div>
-      </div>
-    );
+    return <div className="calculator">{this.props.children}</div>;
   }
 }
 
