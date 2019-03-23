@@ -1,9 +1,12 @@
-import React, { Component } from "react";
+import React, { FunctionComponent } from "react";
+import style from "./Screen.module.css";
 
-class Screen extends Component {
-  render() {
-    return null;
-  }
+interface IProps {
+  value?: string;
 }
 
-export default Screen;
+const screen: FunctionComponent<IProps> = (props: IProps) => (
+  <div className={`screen ${style["screen"]} right`}>{props.value}</div>
+);
+
+export default screen;

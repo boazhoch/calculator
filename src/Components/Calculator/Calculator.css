@@ -1,0 +1,23 @@
+.calculator {
+  display: inline-grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  max-width: 560px;
+  gap: 18px;
+  padding: 3% 2% 4% 2%;
+  background: #181818;
+}
+
+.screen {
+  grid-column-start: 1;
+  grid-column-end: 6;
+  grid-row-start: 1;
+  grid-row-end: 1;
+}
+
+.btn__equal {
+  grid-column-start: 4;
+  grid-column-end: 6;
+  grid-row-start: 4;
+  grid-row-end: 6;
+}
