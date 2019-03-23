@@ -1,10 +1,13 @@
 import React, { Component } from "react";
+import { IHttp, OPERATIONS } from "../../services/http/IHttp";
 
 interface IProps {
+  notifier: any;
+  apiService: IHttp;
   renderChildren: (
     handleClick: (data: string) => void,
     handleSum: () => void,
-    handleArithmeticOperation: (type: string) => void,
+    handleArithmeticOperation: (type: OPERATIONS) => void,
     resetCalculator: (displayValue: string, isTouched?: boolean) => void,
     screenDisplay: string
   ) => JSX.Element;
@@ -22,35 +25,55 @@ class CalculatorContainer extends Component<IProps, IState> {
     isCalculated: false
   };
 
-  private arithmeticOperation: ((a: number, b: number) => number) | undefined;
-
-  private arithmeticOperations = new Map([
-    ["+", (a: number, b: number) => a + b],
-    ["-", (a: number, b: number) => a - b],
-    ["/", (a: number, b: number) => a / b],
-    ["x", (a: number, b: number) => a * b]
-  ]);
+  private arithmeticOperation?: string;
+  private isLock: boolean = false;
 
   private slots: { [index: string]: number } = {};
 
+  private lockKeys(shouldLock: boolean = true) {
+    this.isLock = shouldLock;
+  }
+
   handleSum = () => {
     if (this.isReadyToSumNumbers()) {
-      const newValue = (this.arithmeticOperation as ((
-        a: number,
-        b: number
-      ) => number))(this.slots["1"], this.slots["2"]).toString();
+      this.lockKeys();
+      this.props.notifier.info(
+        "Calculator is now locked while calculating result."
+      );
 
-      this.resetArithmeticOperation();
-
-      this.resetSlots();
-
-      this.setSlot("1", newValue);
-
-      this.setState({
-        screenDisplay: newValue,
-        isTouched: true,
-        isCalculated: true
-      });
+      this.props.apiService
+        .sum(
+          this.arithmeticOperation as OPERATIONS,
+          this.slots["1"],
+          this.slots["2"]
+        )
+        .then(response => {
+          if (!response.ok) {
+            console.log(response.json());
+            throw new Error("err");
+          }
+          return response.json();
+        })
+        .then(res => {
+          this.resetArithmeticOperation();
+          this.resetSlots();
+          this.setSlot("1", res.data);
+          this.setState(
+            {
+              screenDisplay: res.data,
+              isTouched: true,
+              isCalculated: true
+            },
+            () => {
+              this.lockKeys(false);
+              this.props.notifier.success("Calculated result!🦄");
+            }
+          );
+        })
+        .catch((err: Error) => {
+          this.lockKeys(false);
+          this.props.notifier.error(err.message);
+        });
     }
   };
 
@@ -69,6 +92,10 @@ class CalculatorContainer extends Component<IProps, IState> {
   }
 
   handleClick = (data: string) => {
+    if (this.isLock) {
+      this.props.notifier.warning("Cannot click while calculating");
+    }
+
     if (this.slots[1] && !this.arithmeticOperation && this.state.isCalculated) {
       // Reset calculator
       this.resetCalculator(data, true);
@@ -91,10 +118,8 @@ class CalculatorContainer extends Component<IProps, IState> {
     this.slots[key] = parseFloat(value);
   }
 
-  handleArithmeticOperation = (operation: string) => {
-    this.arithmeticOperation = this.arithmeticOperations.get(
-      operation.toLowerCase()
-    );
+  handleArithmeticOperation = (operation: any) => {
+    this.arithmeticOperation = OPERATIONS[operation];
 
     this.setState({
       screenDisplay: this.slots["1"] + operation,

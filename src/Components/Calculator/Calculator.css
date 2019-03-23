@@ -2,10 +2,13 @@
   display: inline-grid;
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(5, 1fr);
-  max-width: 560px;
+  max-width: 432px;
   gap: 18px;
   padding: 3% 2% 4% 2%;
   background: #181818;
+  left: 50%;
+  transform: translateX(-50%);
+  position: relative;
 }
 
 .screen {
